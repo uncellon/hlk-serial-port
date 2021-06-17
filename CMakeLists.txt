@@ -12,7 +12,9 @@ find_package(HlkEvents REQUIRED)
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 add_library(Hlk::SerialPort ALIAS ${PROJECT_NAME})
 
-add_subdirectory(test)
+if (BUILD_TEST)
+    add_subdirectory(test)
+endif()
 
 # Specify include directories for "local" build and installed library
 target_include_directories(
