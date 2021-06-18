@@ -1,4 +1,4 @@
-#include "serialport.h"
+#include <hlk/serialport/serialport.h>
 
 #include <cmath>
 #include <string>

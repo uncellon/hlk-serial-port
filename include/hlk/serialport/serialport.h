@@ -98,18 +98,18 @@ public:
     void setStopBits(StopBits stopBits);
 
 protected:
-    int fd_;
-    BaudRate baudRate_;
-    DataBits dataBits_;
-    Parity parity_;
-    StopBits stopBits_;
-    termios options_;
+    int m_fd;
+    BaudRate m_baudRate;
+    DataBits m_dataBits;
+    Parity m_parity;
+    StopBits m_stopBits;
+    termios m_options;
 
-    static std::thread *pollingThread_;    // singleton thread to polling ports
-    static bool threadRunning_;            // thread quit confition
-    static std::mutex mutex_;               // vectors protection mutex
-    static std::vector<pollfd> pollFds_;   // polling file descriptors
-    static std::vector<SerialPort *> instances_;    // port instances (non-static objects)
+    static std::thread *m_pollingThread;    // singleton thread to polling ports
+    static bool m_threadRunning;            // thread quit confition
+    static std::mutex m_mutex;               // vectors protection mutex
+    static std::vector<pollfd> m_pollFds;   // polling file descriptors
+    static std::vector<SerialPort *> m_instances;    // port instances (non-static objects)
 
     static void polling();
 };
@@ -178,17 +178,17 @@ inline SerialPort::RetCode SerialPort::write(const char *data, size_t length) {
     return write(static_cast<const void *>(data), length); 
 }
 
-inline SerialPort::BaudRate SerialPort::baudRate() const { return baudRate_; }
-inline void SerialPort::setBaudRate(SerialPort::BaudRate baudRate) { baudRate_ = baudRate; }
+inline SerialPort::BaudRate SerialPort::baudRate() const { return m_baudRate; }
+inline void SerialPort::setBaudRate(SerialPort::BaudRate baudRate) { m_baudRate = baudRate; }
 
-inline SerialPort::DataBits SerialPort::dataBits() const { return dataBits_; }
-inline void SerialPort::setDataBits(SerialPort::DataBits dataBits) { dataBits_ = dataBits; }
+inline SerialPort::DataBits SerialPort::dataBits() const { return m_dataBits; }
+inline void SerialPort::setDataBits(SerialPort::DataBits dataBits) { m_dataBits = dataBits; }
 
-inline SerialPort::Parity SerialPort::parity() const { return parity_; }
-inline void SerialPort::setParity(SerialPort::Parity parity) { parity_ = parity; }
+inline SerialPort::Parity SerialPort::parity() const { return m_parity; }
+inline void SerialPort::setParity(SerialPort::Parity parity) { m_parity = parity; }
 
-inline SerialPort::StopBits SerialPort::stopBits() const { return stopBits_; }
-inline void SerialPort::setStopBits(SerialPort::StopBits stopBits) { stopBits_ = stopBits; }
+inline SerialPort::StopBits SerialPort::stopBits() const { return m_stopBits; }
+inline void SerialPort::setStopBits(SerialPort::StopBits stopBits) { m_stopBits = stopBits; }
 
 } // namespace Hlk
 

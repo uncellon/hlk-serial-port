@@ -1,67 +1,73 @@
 cmake_minimum_required(VERSION 3.16)
 project(HlkSerialPort VERSION 1.0.0)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -rdynamic -pthread")
+option(BUILD_EXAMPLES "Build examples" ON)
 
-file(GLOB HEADERS src/*.h)
-file(GLOB SOURCES src/*.cpp)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread")
 
 find_package(HlkEvents REQUIRED)
+
+file(GLOB HEADERS include/hlk/serialport/*.h)
+file(GLOB SOURCES include/hlk/serialport/*.cpp)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 add_library(Hlk::SerialPort ALIAS ${PROJECT_NAME})
 
-if (BUILD_TEST)
-    add_subdirectory(test)
-endif()
-
-# Specify include directories for "local" build and installed library
-target_include_directories(
-    ${PROJECT_NAME} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-        $<INSTALL_INTERFACE:include/hlk/serialport>
-)
+target_link_libraries(${PROJECT_NAME} PUBLIC Hlk::Events)
 
 set_target_properties(
     ${PROJECT_NAME} PROPERTIES 
-        PUBLIC_HEADER "${HEADERS}"          # Headers to copy
+        PUBLIC_HEADER "${HEADERS}"
         EXPORT_NAME SerialPort
-        # VERSION ${PROJECT_VERSION}          # Generate library in format libhlkserialport.so.X.Y.Z and create symbol links
-        # SOVERSION ${PROJECT_VERSION_MAJOR}  # Generate symbol link in format libserialport.so.X
 )
 
-# Install library and headers
-install(
-    TARGETS ${PROJECT_NAME} 
-    EXPORT ${PROJECT_NAME}Targets
-        PUBLIC_HEADER 
-            DESTINATION include/hlk/serialport
-        ARCHIVE 
-            DESTINATION lib 
-        LIBRARY 
-            DESTINATION lib 
-        RUNTIME 
-            DESTINATION bin)
+target_include_directories(
+    ${PROJECT_NAME} INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include/hlk/serialport>
+)
 
-# Generate base config and install
+install(
+    TARGETS ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}Targets
+    PUBLIC_HEADER
+        DESTINATION "include/hlk/serialport"
+    LIBRARY
+        DESTINATION "lib"
+)
+
 install(
     EXPORT ${PROJECT_NAME}Targets
     NAMESPACE Hlk::
-    FILE ${PROJECT_NAME}Config.cmake
-    DESTINATION lib/cmake/${PROJECT_NAME})
+    FILE "${PROJECT_NAME}Config.cmake"
+    DESTINATION "lib/cmake/${PROJECT_NAME}"
+)
 
-# Generate version config
+# Generate local "${PROJECT_NAME}Config.cmake"
+export(
+    EXPORT ${PROJECT_NAME}Targets
+    FILE ${PROJECT_NAME}Config.cmake
+)
+# Since the export(...) is performed after find_package(...), create an empty file to avoid find_package(...) errors
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake)
+
+# Generate config for version supporting
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
     ${PROJECT_NAME}ConfigVersion.cmake
-        VERSION ${PROJECT_VERSION}
-        COMPATIBILITY AnyNewerVersion
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion
 )
 
-# Install version config
+# Install config for version supporting
 install(
     FILES
         ${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
     DESTINATION lib/cmake/${PROJECT_NAME}
 )
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(example)
+endif()
